@@ -1,0 +1,53 @@
+# Stage 1: Build the React application
+# We use a Node.js image to compile your React code.
+FROM node:18-alpine AS build
+
+# Set the working directory inside the container. All subsequent commands will run from here.
+WORKDIR /app
+
+# Copy the package.json and package-lock.json files first.
+# This helps Docker cache these layers, so if only your code changes, it doesn't re-run 'npm install'.
+COPY client/package.json ./
+COPY client/package-lock.json ./
+
+# Install project dependencies.
+RUN npm install
+
+# Copy all other client-side source code into the container.
+COPY client/. .
+
+# --- Important for Vite and Docker Networking ---
+# Your client's .env has VITE_API_URL=http://localhost:8080.
+# 'localhost' inside a Docker container refers to that container itself.
+# To reach your server container, you need to use the Docker Compose service name, which will be 'server'.
+# We pass VITE_API_URL as a build argument and set it as an environment variable for the build process.
+# Vite automatically picks up variables prefixed with VITE_ from process.env.
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
+# Build the client application for production.
+# This command generates optimized static files (HTML, CSS, JS) into the 'dist' folder.
+RUN npm run build
+
+# Stage 2: Serve the built application with Nginx
+# We use a lightweight Nginx image to serve the static files created in the 'build' stage.
+FROM nginx:1.21.3-alpine
+
+# Remove Nginx's default configuration file. We'll provide our own.
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy your custom Nginx configuration file. This is crucial for client-side routing.
+# The path is now corrected to reflect its location relative to the build context (project root).
+COPY client/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the built React app from the 'build' stage (located at /app/dist)
+# to Nginx's default web serving directory (/usr/share/nginx/html).
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port 80. This tells Docker that the container listens on this port.
+# We'll map this to your host machine's port 80 later in docker-compose.yml.
+EXPOSE 80
+
+# Command to run Nginx in the foreground.
+# 'daemon off;' ensures Nginx stays active and doesn't exit immediately.
+CMD ["nginx", "-g", "daemon off;"]

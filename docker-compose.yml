@@ -1,0 +1,40 @@
+# No 'version' attribute needed for newer Docker Compose versions
+
+services:
+  # Define the client service (your React app)
+  client:
+    build:
+      context: . # Build context is the project root (where docker-compose.yml is)
+      dockerfile: client/Dockerfile.client # Path to the client's Dockerfile
+      args:
+        # Pass the VITE_API_URL environment variable to the client's build process.
+        # 'server' is the hostname of the server service within the Docker network.
+        - VITE_API_URL=http://server:8080
+    ports:
+      # Map host port 80 to container port 80 for the client
+      - "80:80"
+    container_name: client_app_container # Give a custom name to the container
+    restart: always # Always restart if the container stops
+    # Optional: ensure the server is up before the client tries to connect
+    # This doesn't wait for the server to be *ready*, just for it to start.
+    depends_on:
+      - server
+
+  # Define the server service (your Node.js Express app)
+  server:
+    build:
+      context: . # Build context is the project root
+      dockerfile: server/Dockerfile.server # Path to the server's Dockerfile
+    ports:
+      # Map host port 8080 to container port 8080 for the server
+      - "8080:8080"
+    container_name: server_app_container # Give a custom name to the container
+    restart: always # Always restart if the container stops
+    env_file:
+      # Load environment variables from the server's .env file into the container
+      # Ensure this path is correct relative to the docker-compose.yml file
+      - server/.env
+    # Optional: for development, mount the server directory to enable hot-reloading
+    # (if nodemon is set up correctly and handling file changes within the container)
+    volumes:
+      - ./server:/app # Mount the host's server directory into the container

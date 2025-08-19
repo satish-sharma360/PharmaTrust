@@ -1,0 +1,31 @@
+# Use a lightweight Node.js image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json first for caching
+COPY server/package.json ./
+COPY server/package-lock.json ./
+
+# Install dependencies. The --production flag installs only production dependencies.
+# If you need dev dependencies for build steps (e.g., Typescript compilation), remove this flag.
+# Given your package.json has nodemon as a dev dependency but you use "npm start"
+# which likely triggers nodemon, we'll install all dependencies for simplicity.
+RUN npm install
+
+# Copy the rest of your server's source code
+COPY server/. .
+
+# Your .env file is copied by Docker Compose, but good practice to show where it would be.
+# If you don't use env_file in docker-compose.yml, you'd COPY server/.env ./.env here.
+# For this setup, Docker Compose handles it.
+
+# Expose the port your server listens on (from your .env: PORT=8080)
+EXPOSE 8080
+
+# Command to start your server. Ensure your package.json has a "start" script.
+# "start": "nodemon server.js" is good for development, but for production,
+# you might want "node server.js" or use a process manager like PM2 if not using nodemon.
+# For simplicity with your provided package.json, we'll use npm start.
+CMD ["npm", "start"]
