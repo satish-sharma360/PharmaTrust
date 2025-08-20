@@ -21,7 +21,7 @@ PharmaTrust is a modern web application designed to manage pharmaceutical invent
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
 - **Authentication:** JWT (JSON Web Tokens)
-- **Others:** Axios, Redux, Framer Motion (optional for animations)
+- **Others:** Axios, Redux
 
 ---
 
@@ -56,4 +56,5 @@ JWT_SECRET=your_jwt_secret
 ```bash
 email:kuldeep@gmail.com
 NIC:584658
+
 
