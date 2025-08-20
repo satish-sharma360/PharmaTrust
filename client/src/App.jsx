@@ -131,7 +131,7 @@ const App = () => {
         <Route path="/order-history" element={<OrderHistory />} />
 
         <Route element={<PrivateRoute />}>
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<Profile />} />
         </Route>
 
         <Route path="/employee-management" element={<EmployeeManagement />} />

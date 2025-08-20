@@ -2,7 +2,7 @@ import { FaChevronDown, FaList, FaSearch } from 'react-icons/fa';
 import { Search, Phone, User, UserPlus, Menu, X } from 'lucide-react';;
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, Links } from 'react-router-dom';
 
 function Navigation() {
   const { currentUser } = useSelector((state) => state.user);
@@ -98,16 +98,6 @@ function Navigation() {
                   )}
                 </div>
 
-                {/* User Profile (if logged in) */}
-                {currentUser && (
-                  <a href="/profile" className="group">
-                    <img
-                      className="w-10 h-10 rounded-full border-2 border-cyan-400/50 group-hover:border-cyan-400 transition-colors"
-                      src={currentUser.avatar}
-                      alt="Profile"
-                    />
-                  </a>
-                )}
               </div>
 
               {/* Menu Icon */}
